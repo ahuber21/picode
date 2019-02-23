@@ -1,0 +1,11 @@
+stages:
+  - Code checks
+
+check_code:
+  stage: Code checks
+  image: ahoenle/kagglenauts-pipeline-tools
+  variables: {
+    python_dirs: 'src'
+  }
+  script:
+    - /scripts/check-code
