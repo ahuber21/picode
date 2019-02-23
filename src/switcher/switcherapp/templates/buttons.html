@@ -1,0 +1,15 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <table style="width:300px">
+        <tr>
+        <th>Switch Name</th>
+        <th>Status</th> 
+        </tr>
+        <tr>
+        <td class="switch_name">Switch 1</td>
+        <td class="switch"><input type="checkbox" checked data-toggle="toggle" data-width="100"></td> 
+        </tr>
+    </table>
+{% endblock %}

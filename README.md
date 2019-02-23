@@ -25,4 +25,11 @@ pre-commit install
 
 A webapp that can switch attached relays. Usually used for switching lights.
 
+Notes:
+
+* Bootstrap version 2.3.2
+* Bootstrap toggle from http://www.bootstraptoggle.com/
+
 ### zapfhahn
+
+All the code that is required to run the Zapfhahn.
