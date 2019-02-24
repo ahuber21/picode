@@ -10,8 +10,30 @@
         {% for switch_name, port in config["switches"].items() %}
             <tr>
             <td class="switch_name">{{switch_name}}</td>
-            <td class="switch"><input type="checkbox" checked data-toggle="switch-{{port}}" data-width="100"></td>
+            <td class="switch"><input type="checkbox" checked data-toggle="toggle" id={{port}} data-width="100"></td>
             </tr>
         {% endfor %}
     </table>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- initialize and manipulate all the buttons -->
+{% for port, state in states.items() %}
+<script>
+    // initialize
+    $('#{{port}}').bootstrapToggle("{{state}}" == "true" ? "on" : "off");
+    // handle toggles
+    $(function() {
+    $('#{{port}}').change(function() {
+        $.ajax({
+            type: "POST",
+            url: "/toggle",
+            data: {port: {{port}}, state: $(this).prop('checked')},
+            dataType: "text"
+            });
+    })
+    })
+</script>
+{% endfor %}
 {% endblock %}

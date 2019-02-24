@@ -2,16 +2,17 @@
 routes.py for the switcher web app project
 """
 
+import json
 import os
 
-from flask import render_template
+from flask import render_template, request
 
 from app import app
+from utils.helpers import get_states, get_states_file
 from utils.log import get_logger
 from utils.config import get_config
 
 log = get_logger(os.path.basename(__file__))
-config = get_config()
 
 
 @app.errorhandler(404)
@@ -27,4 +28,16 @@ def internal_error(error):
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("buttons.html", config=config)
+    return render_template("buttons.html", config=get_config(), states=get_states())
+
+
+@app.route("/toggle", methods=["POST"])
+def toggle():
+    port = request.form.get("port")
+    state = request.form.get("state")
+    log.info("Switching port %s. New state: %s", port, state)
+    states = get_states()
+    states[port] = state
+    with open(get_states_file(), "w") as fp:
+        json.dump(states, fp)
+    return "Thanks"
