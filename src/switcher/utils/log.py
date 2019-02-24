@@ -11,6 +11,8 @@ import logging
 
 from copy import copy
 
+from utils.config import get_config
+
 # logging color values
 MAPPING = {
     "DEBUG": 37,  # white
@@ -21,6 +23,22 @@ MAPPING = {
 }
 PREFIX = "\033["
 SUFFIX = "\033[0m"
+
+config = get_config()
+try:
+    loglevel_str = config.loglevel
+except AttributeError:
+    loglevel = logging.INFO
+else:
+    if loglevel_str.lower() == "debug":
+        loglevel = logging.DEBUG
+    elif loglevel_str.lower() == "info":
+        loglevel = logging.INFO
+    elif loglevel_str.lower() == "error":
+        loglevel = logging.ERROR
+    else:
+        loglevel = logging.INFO
+loglevel = logging.DEBUG
 
 
 class ColoredFormatter(logging.Formatter):
@@ -36,7 +54,7 @@ class ColoredFormatter(logging.Formatter):
         return logging.Formatter.format(self, colored_record)
 
 
-def get_logger(name, level=logging.INFO):
+def get_logger(name, level=loglevel):
     log = logging.getLogger(name)
     log.setLevel(level)
     formatter = ColoredFormatter(

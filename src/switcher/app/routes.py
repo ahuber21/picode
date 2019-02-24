@@ -8,8 +8,10 @@ from flask import render_template
 
 from app import app
 from utils.log import get_logger
+from utils.config import get_config
 
 log = get_logger(os.path.basename(__file__))
+config = get_config()
 
 
 @app.errorhandler(404)
@@ -25,4 +27,4 @@ def internal_error(error):
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("buttons.html")
+    return render_template("buttons.html", config=config)
