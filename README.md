@@ -6,7 +6,7 @@ To set up the RPi do
 
 ```bash
 # first make sure you installed python3.7.2
-git clone https://gitlab.com/groups/saufhaengerle/picode
+git clone https://gitlab.com/saufhaengerle/picode
 cd picode
 python3.7 -m venv venv
 source venv/bin/activate
