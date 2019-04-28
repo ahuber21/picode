@@ -1,3 +1,6 @@
 [submodule "rpi-rgb-led-matrix"]
 	path = rpi-rgb-led-matrix
 	url = https://github.com/hzeller/rpi-rgb-led-matrix
+[submodule "src/zapfhahn/hardware/FPM-C"]
+	path = src/zapfhahn/hardware/FPM-C
+	url = https://github.com/brianrho/FPM-C
