@@ -73,7 +73,6 @@ We have these connections
 | 5          | yellow             | GND           | green         |                   |
 | 6          | black              | 3.3V/17       | yellow        |                   |
 | 7          | red                | not connected |               |                   |
-|            |                    |               |               |                   |
 
 
 _Here begins the original README:_
