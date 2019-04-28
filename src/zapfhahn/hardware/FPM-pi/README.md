@@ -46,6 +46,36 @@ The code can be compiled using
  gcc -lwiringPi -o test fpm_raspi.c
  ```
 
+
+ ## Wiring
+
+The picture shows how the sensor was connected to the RPi.
+
+<img src="doc/fingerwiring.jpg" alt="Wiring to RasPi" width="600">
+
+It is installed according to the manual, with pins 1 and 7 left disconnected.
+Only the UART, 3.3V and GND pins are connected.
+
+<img src="doc/fingerpins.png" alt="Fingerprint sensor pinout" width="600">
+
+The pins on the RPi are labeled like this
+
+<img src="doc/pi3_gpio.png" alt="Fingerprint sensor pinout" width="600">
+
+We have these connections
+
+| Sensor pin | Sensor cable color | RPi pin       | RPi color     | Comment           |
+|------------|--------------------|---------------|---------------|-------------------|
+| 1          | orange             | not connected |               |                   |
+| 2          | white              | 3.3V/01       | black         |                   |
+| 3          | blue               | GPIO14 TX/08  | orange/purple | RPi TX->Sensor TX |
+| 4          | green              | GPIO15 RX/08  | yellow/blue   | RPi RX->Sensor RX |
+| 5          | yellow             | GND           | green         |                   |
+| 6          | black              | 3.3V/17       | yellow        |                   |
+| 7          | red                | not connected |               |                   |
+|            |                    |               |               |                   |
+
+
 _Here begins the original README:_
 
 ## Generic C library for R3xx/ZFMxx/FPMxx/R551 fingerprint modules
