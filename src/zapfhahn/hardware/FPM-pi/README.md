@@ -36,9 +36,22 @@ and add the lines
 enable_uart=1
 dtoverlay=pi3-disable-bt
 ```
+
+Further /boot/cmdline.txt needs some editing to prevent the console from using the UART
+
+```bash
+sudo emacs -nw /boot/cmdline.txt
+```
+
+and remove the following entry
+
+```
+console=serial0,115200
+```
+
 It is also necessary to disable the system service that initialises the modem so it doesn't use the UART: `sudo systemctl disable hciuart`.
 
-After rebooting, this will make the uart pins available as `/dev/ttyS0`.
+After rebooting, this will make the uart pins available as `/dev/ttyAMA0` or better `/dev/serial0`.
 
 The code can be compiled using
 

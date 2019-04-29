@@ -4,7 +4,7 @@
 #include <wiringSerial.h>
 
 #include "fpm_raspi.h"
-#include "fpm.h"
+#include "../FPM-C/fpm.h"
 
 static int fd = 0;
 
@@ -58,8 +58,8 @@ uint16_t serial_avail() {
 }
 
 int main() {
-    char* device = "/dev/ttyAMA0";
-    fd = serialOpen(device, 115200);
+    char* device = "/dev/serial0";
+    fd = serialOpen(device, 57600);
     if (fd < 0) {
         printf("Unable to open %s, fd is %d\n", device, fd);
         return 1;
