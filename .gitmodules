@@ -4,3 +4,6 @@
 [submodule "src/zapfhahn/hardware/FPM-C"]
 	path = src/zapfhahn/hardware/FPM-C
 	url = https://github.com/brianrho/FPM-C
+[submodule "src/zapfhahn/hardware/pyfingerprint"]
+	path = src/zapfhahn/hardware/pyfingerprint
+	url = https://github.com/bastianraschke/pyfingerprint

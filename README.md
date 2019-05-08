@@ -1,11 +1,19 @@
 # picode - All code that is run on the Saufhaengerle Raspberry Pi
 
-Code here is set up for python version 3.7.2 and all required packages are defined in `requirements.txt`.
+Code here is set up for python version 3.X and all required packages are defined in `requirements.txt`.
 
 To set up the RPi do
 
 ```bash
-# first make sure you installed python3.7.2
+# first make sure you installed python3.X + some dev libs
+sudo apt-get install python3 python3-dev libtiff5-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev libharfbuzz-dev libfribidi-dev tcl8.6-dev tk8.6-dev python-tk
+```
+
+(most of the requirements are for `Pillow` which is required by pyfingerprint)
+
+Now set up the virtual environment
+
+```bash
 git clone --recursive https://gitlab.com/saufhaengerle/picode
 cd picode
 python3.7 -m venv venv
@@ -33,3 +41,11 @@ Notes:
 ### zapfhahn
 
 All the code that is required to run the Zapfhahn.
+
+## Install pyfingerprint
+
+```bash
+# dirty hack because pip install does not actually install the package, only sets the context
+mkdir venv/lib/python3.5/site-packages/pyfingerprint
+cp src/zapfhahn/hardware/pyfingerprint/src/files/pyfingerprint/pyfingerprint.py venv/lib/python3.5/site-packages/pyfingerprint
+```
