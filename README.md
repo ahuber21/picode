@@ -6,7 +6,7 @@ To set up the RPi do
 
 ```bash
 # first make sure you installed python3.X + some dev libs
-sudo apt-get install python3 python3-dev libtiff5-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev libharfbuzz-dev libfribidi-dev tcl8.6-dev tk8.6-dev python-tk git python3-venv emacs devscripts equivs libjpeg-dev
+sudo apt-get install python3 python3-dev libtiff5-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev libharfbuzz-dev libfribidi-dev tcl8.6-dev tk8.6-dev python-tk git python3-venv emacs devscripts equivs libjpeg-dev apt-get install python3-dev
 ```
 
 (most of the requirements are for `Pillow` which is required by pyfingerprint)
