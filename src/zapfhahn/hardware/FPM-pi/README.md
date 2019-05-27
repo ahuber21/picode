@@ -1,4 +1,7 @@
-﻿## ahoenle:
+﻿* [ahoenle:](#ahoenle)
+* [Generic C library for R3xx/ZFMxx/FPMxx/R551 fingerprint modules](#generic-c-library-for-r3xxzfmxxfpmxxr551-fingerprint-modules)
+
+## ahoenle:
 
 Original README below, this was added by ahoenle on 2019-04-19.
 
@@ -81,8 +84,8 @@ We have these connections
 |------------|--------------------|---------------|---------------|-------------------|
 | 1          | orange             | not connected |               |                   |
 | 2          | white              | 3.3V/01       | black         |                   |
-| 3          | blue               | GPIO14 TX/08  | orange/purple | RPi TX->Sensor TX |
-| 4          | green              | GPIO15 RX/08  | yellow/blue   | RPi RX->Sensor RX |
+| 3          | blue               | GPIO15 TX/10  | orange/purple | RPi TX->Sensor RX |
+| 4          | green              | GPIO14 RX/08  | yellow/blue   | RPi RX->Sensor TX |
 | 5          | yellow             | GND           | green         |                   |
 | 6          | black              | 3.3V/17       | yellow        |                   |
 | 7          | red                | not connected |               |                   |

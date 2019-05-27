@@ -6,6 +6,7 @@ The continuously running daemon that gives us beer
 
 import os
 
+import RPi.GPIO as GPIO
 import time
 import yaml
 
@@ -13,12 +14,14 @@ from statemachine import StateMachine, State
 
 from utils.log import get_logger
 
-from database.log import DbLogger
+from database.dblog import DbLogger
 from hardware.fingerprint import SaufFinger
 from hardware.flowmeter import Flowmeter
 from hardware.valve import MagneticValve
 
-log = get_logger(os.path.basename(__file__))
+from logging import DEBUG
+
+log = get_logger(os.path.basename(__file__), level=DEBUG)
 
 config_file = "daemon_config.yaml"
 
@@ -27,17 +30,60 @@ config_file = "daemon_config.yaml"
 #       Let them blink while the valves are open
 #       Switch them off when the valves close
 
-class StateAttributes():
+class StateAttributes:
     """
     helper class that stores all the changing attributes that are required in the
     various states
     """
-    # index of the database entry that is being processes
-    index = None
-    # name of the person behind the index
-    name = ""
-    # consumed quantity of beer after valves closed again
-    consumed = 0
+
+    # user_index of the database entry that is being processes
+    user_index = None
+    # name of the person behind the user_index
+    user_name = ""
+    # valve info
+    valve_slot = -1
+    valve_pin = -1
+    valve_name = ""
+    valve_quantity_ml = -1
+    valve_timeout_seconds = -1
+    valve_open_time = ""
+    valve_close_time = ""
+    # counter info
+    counter_name = ""
+    counter_pin = -1
+    counter_slot = -1
+    counter_ticks = -1
+    counter_global_ticks = -1
+    counter_conv_factor = -1
+    quantity_ml = 0
+    # tapping procedure exit status
+    tap_status = "STATUS_UNKNW"
+    # screenshot names from webcam
+    screenshot1 = ""
+    screenshot2 = ""
+    # misc
+    misc = ""
+
+    def add_valve(self, valve):
+        if not valve:
+            return
+        self.valve_pin = valve.pin
+        self.valve_slot = valve.slot
+        self.valve_name = valve.name
+        self.valve_quantity_ml = valve.quantity_ml
+        self.valve_timeout_seconds = valve.timeout_seconds
+
+    def add_counter(self, counter):
+        if not counter:
+            return
+        self.counter_name = counter.name
+        self.counter_pin = counter.pin
+        self.counter_slot = counter.slot
+        self.counter_ticks = counter.ticks
+        self.counter_global_ticks = counter.global_count["ticks"]
+        self.counter_conv_factor = counter.conversion_factor
+        self.quantity_ml = counter.ml
+
 
 class SaufDaemon(StateMachine):
     """
@@ -77,9 +123,15 @@ class SaufDaemon(StateMachine):
         self.attributes = StateAttributes()
         # hardware
         self.finger = SaufFinger()
-        self.valves = __init_valves()
-        self.flowmeters = __init_flowmeters()
+        self.valves = self.__init_valves()
+        self.flowmeters = self.__init_flowmeters()
         self.__sanity_checks()
+        # database
+        self.dblog = DbLogger()
+
+    def __del__(self):
+        """ cleanup GPIO """
+        GPIO.cleanup()
 
     def _dump_config(self):
         """ expert use only! dump and overwrite current config on disk """
@@ -89,12 +141,12 @@ class SaufDaemon(StateMachine):
     def __init_valves(self):
         """ initialize the valves with settings from the global config """
         log.info("Initializing %d valves", len(self.config["valves"]))
-        return [MagneticValve(settings) for settings in self.config["valves"]]
+        return [MagneticValve(**settings) for settings in self.config["valves"]]
 
-    def __init_valves(self):
+    def __init_flowmeters(self):
         """ initialize the flowmeters with settings from the global config """
         log.info("Initializing %d flowmeters", len(self.config["flowmeters"]))
-        return [Flowmeter(settings) for settings in self.config["flowmeters"]]
+        return [Flowmeter(**settings) for settings in self.config["flowmeters"]]
 
     def __sanity_checks(self):
         """ run sanity checks to avoid undefined behaviour later """
@@ -103,13 +155,19 @@ class SaufDaemon(StateMachine):
                 if meter.slot == valve.slot:
                     break
             else:
-                raise RuntimeError("Registered valve in slot %d has now corresponding flowmeter", valve.slot)
+                raise RuntimeError(
+                    "Registered valve in slot %d has now corresponding flowmeter",
+                    valve.slot,
+                )
         for meter in self.flowmeters:
             for valve in self.valves:
                 if valve.slot == meter.slot:
                     break
             else:
-                raise RuntimeError("Registered flowmeter in slot %d has now corresponding valve", valve.slot)
+                raise RuntimeError(
+                    "Registered flowmeter in slot %d has now corresponding valve",
+                    valve.slot,
+                )
 
     def load_config(self):
         """ load settings from a yaml file on disk """
@@ -121,68 +179,60 @@ class SaufDaemon(StateMachine):
             "valve_global_timeout_seconds": 40,
             "valves": [
                 {
-                "name": "valve_slot0",
-                "pin": 1234,
-                "slot": 0,
-                "quantity_ml": 500,
-                "timeout_seconds": 20,
-            },
-            {
-                "name": "valve_slot1",
-                "pin": 1234,
-                "slot": 1,
-                "quantity_ml": 500,
-                "timeout_seconds": 20,
-            },
-            {
-                "name": "valve_slot2",
-                "pin": 1234,
-                "slot": 3,
-                "quantity_ml": 500,
-                "timeout_seconds": 20,
-            },
-            {
-                "name": "valve_slot3",
-                "pin": 1234,
-                "slot": 4,
-                "quantity_ml": 500,
-                "timeout_seconds": 20,
-            }
+                    "name": "valve_slot0",
+                    "pin": 21,
+                    "slot": 0,
+                    "quantity_ml": 500,
+                    "timeout_seconds": 20,
+                },
+                {
+                    "name": "valve_slot1",
+                    "pin": 20,
+                    "slot": 1,
+                    "quantity_ml": 500,
+                    "timeout_seconds": 20,
+                },
+                {
+                    "name": "valve_slot2",
+                    "pin": 16,
+                    "slot": 3,
+                    "quantity_ml": 500,
+                    "timeout_seconds": 20,
+                },
+                {
+                    "name": "valve_slot3",
+                    "pin": 12,
+                    "slot": 4,
+                    "quantity_ml": 500,
+                    "timeout_seconds": 20,
+                },
             ],
             "flowmeters": [
-                {
-                "name": "flowmeter_slot0",
-                "pin": 1234,
-                "slot": 0
-            },
-            {
-                "name": "flowmeter_slot1",
-                "pin": 1234,
-                "slot": 1,
-            },
-            {
-                "name": "flowmeter_slot2",
-                "pin": 1234,
-                "slot": 3,
-            },
-            {
-                "name": "flowmeter_slot3",
-                "pin": 1234,
-                "slot": 4,
-            }
-            ]
-            }
+                {"name": "flowmeter_slot0", "pin": 26, "slot": 0},
+                {"name": "flowmeter_slot1", "pin": 19, "slot": 1},
+                {"name": "flowmeter_slot2", "pin": 13, "slot": 3},
+                {"name": "flowmeter_slot3", "pin": 6, "slot": 4},
+            ],
+        }
 
     def run(self):
         # initialise the state machine
         StateMachine.__init__(self)
         while True:
-            self.next()
-            if self.current_state == self.error:
-                log.error("Ended up in error state"
-                log.error("Sleeping for 5s and going to reset")
-                time.sleep(5)
-                self.run(self.reset)
+            try:
+                if self.current_state == self.error:
+                    log.error("Ended up in error state")
+                    log.error("Sleeping for 5s and going to reset")
+                    time.sleep(5)
+                    self.current_state = self.reset
+                    continue
+                self.next()
+            except KeyboardInterrupt:
+                log.debug("Caught KeyboardInterrupt. Exiting gracefully")
+                break
+            except Exception as e:
+                log.error("Encountered exception of type '%s' in run loop. Exception message: '%s'. Going to error state.", type(e), str(e))
+                self.current_state = self.error
 
     #
     # handlers for the various states
@@ -208,10 +258,10 @@ class SaufDaemon(StateMachine):
 
     def on_enter_waiting_finger(self):
         log.info("Entering waiting for finger")
-        self.finger.lights_on()
+        # self.finger.lights_on()
         idx, name = self.finger.read_single()
-        self.attributes.index = idx
-        self.attributes.name = name
+        self.attributes.user_index = idx
+        self.attributes.user_name = name
 
     def on_enter_checking(self):
         log.info("Entering checking ID")
@@ -220,6 +270,7 @@ class SaufDaemon(StateMachine):
         log.info("Entering open valves")
         for valve in self.valves:
             valve.open()
+        self.attributes.valve_open_time = formatted_time()
 
     def on_enter_waiting_valve(self):
         log.info("Entering waiting for valves")
@@ -227,7 +278,7 @@ class SaufDaemon(StateMachine):
         for meter in self.flowmeters:
             meter.reset()
         # enable blinking to visualize user we're ready
-        self.finger.run_blinking(timebase=1)
+        # self.finger.run_blinking(timebase=1)
         # - check all valves for changes
         # - as soon as one reached a delta of XY (20??) ml close all the others
         # - when the threshold (self.config.valve_quantity_ml) is reached close the remaining
@@ -236,55 +287,70 @@ class SaufDaemon(StateMachine):
         flowmeter_threshold_ml = 20
         chosen_valve = None
         chosen_flowmeter = None
+        log.debug("Waiting for tap procedure to complete...")
         while True:
             # check for timeout
-            reached_timeout = time.time() - start > chosen_valve.timeout_seconds
-            reached_timeout |= time.time() - start > self.config["valve_global_timeout_seconds"]
+            reached_timeout = (
+                time.time() - start > self.config["valve_global_timeout_seconds"]
+            )
+            if chosen_valve:
+                reached_timeout |= time.time() - start > chosen_valve.timeout_seconds
             if reached_timeout:
                 # burst blink to signal user something is wrong
                 log.warning("Tapping procedure timed out!")
-                self.finger.stop_blinking()
-                self.finger.blink("burst", times=5)
+                # self.finger.stop_blinking()
+                # self.finger.blink("burst", times=5)
+                self.attributes.tap_status = "TAP_TIMEOUT"
                 break
             # check if a valve was chosen
             if not chosen_valve:
                 # need to check all that are registered
                 for meter in self.flowmeters:
-                    if meter.milliliters() > flowmeter_threshold_ml:
+                    if meter.milliliters > flowmeter_threshold_ml:
                         chosen_flowmeter = meter
                         # find the valve in the same slot
                         for valve in self.valves:
                             if valve.slot == meter.slot:
+                                log.debug("Chosen valve is %s", valve.name)
                                 chosen_valve = valve
                             else:
                                 # close all other valves
+                                log.debug("Closing unchosen valve %s", valve.name)
                                 valve.close()
                 continue
-            # wait for tapping procedure to complete
             # chosen_valve and chosen_flowmeter are guaranteed to be set because
             # of __sanity_checks()
-            if chosen_flowmeter.ml() > chosen_valve.quantity_ml():
-                self.finger.stop_blinking()
+            # wait for tapping procedure to complete
+            if chosen_flowmeter.ml > chosen_valve.quantity_ml:
+                # self.finger.stop_blinking()
+                log.debug("Surpassed desired quantity of %s", chosen_valve.quantity_ml)
                 chosen_valve.close()
+                self.attributes.tap_status = "TAP_COMPLETE"
                 break
-        self.finger.stop_blinking()  # in case we exit the loop without calling this
-        self.finger.lights_off()
-        if chosen_flowmeter:
-            self.attributes.consumed = chosen_flowmeter.ml()
-        log.info("Tapping procedure finished. Consumed = %d ml", self.attributes.consumed)
+        # self.finger.stop_blinking()  # in case we exit the loop without calling this
+        # self.finger.lights_off()
+        self.attributes.add_valve(chosen_valve)
+        self.attributes.add_counter(chosen_flowmeter)
+        log.info(
+            "Tapping procedure finished. Consumed = %d ml", self.attributes.quantity_ml
+        )
 
     def on_enter_closing(self):
         log.info("Entering closing valves")
         for valve in self.valves:
             valve.close()
+        self.attributes.valve_close_time = formatted_time()
 
     def on_enter_logging(self):
         log.info("Entering logging")
+        self.dblog.log(self.attributes)
 
     def on_enter_error(self):
         log.error("Entering error")
 
 
+def formatted_time():
+    return time.strftime("%Y-%m-%d %H:%M:%S")
 
 if __name__ == "__main__":
     daemon = SaufDaemon("saufen")

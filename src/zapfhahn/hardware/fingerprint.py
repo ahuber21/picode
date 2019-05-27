@@ -15,16 +15,19 @@ The handler determines which template was read.
 
 import os
 
+import pyfingerprint.pyfingerprint as pyfinger
 import threading
 import time
 import yaml
+
 
 from argparse import ArgumentParser
 from pyfingerprint.pyfingerprint import PyFingerprint
 
 from utils.log import get_logger
 
-log = get_logger(os.path.basename(__file__))
+from logging import DEBUG
+log = get_logger(os.path.basename(__file__), level=DEBUG)
 
 finger_port = "/dev/serial0"
 finger_baud = 57600
@@ -32,6 +35,8 @@ finger_addr = 0xFFFFFFFF
 finger_pass = 0x00000000
 
 database_file = "fingers.yml"
+
+log.debug("Using pyfingerprint library from %s", pyfinger.__file__)
 
 
 class SaufFinger:
@@ -53,10 +58,6 @@ class SaufFinger:
         self.stop_running = threading.Event()
         self.finger_available = threading.Event()
         self.template_index = None
-        # initialize threads, events,... for LED helpers
-        self.blink_thread = None  # depends on args - cannot be initialized here
-        self.stop_blinking = threading.Event()
-        self.lights_are_on = False
         # database
         self.database = self.__load_database()
 
@@ -80,71 +81,36 @@ class SaufFinger:
         if idx in self.database:
             if self.database[idx] != name:
                 log.error("Index %d already exists and names don't match", idx)
-                log.error("database[idx]      = ", self.database[idx])
-                log.error("name to be written = ", name)
+                log.error("database[idx]      = '%s'", self.database[idx])
+                log.error("name to be written = '%s'", name)
                 return
         self.database[idx] = name
         with open(database_file, "w") as db_file:
             yaml.dump(self.database, db_file, default_flow_style=False)
 
-    def lights_on(self):
-        log.error("Lights on is not yet implemented")
-        self.lights_are_on = True
-
-    def lights_off(self):
-        log.error("Lights off is not yet implemented")
-        self.lights_are_on = False
-
-    def stop_blinking(self):
-        """ wrapper around the stop_blinking Event """
-        self.stop_blinking.set()
-
-    def blink(self, mode="default", timebase=0.1, times=1):
-        """
-        Blink the fingerprint sensor LED for feedback
-        Supported modes: default, burst
-        Restores the original light state (on/off) afterwards
-
-        If times=-1 blink will call itself repeatedly in a thread that can be signaled
-        to stop with SaufFinger.stop_blink()
-        """
-        if times == -1:
-            if not self.blink_thread:
-                self.stop_blinking.clear()
-                self.blink_thread = threading.Thread(target=self.blink, args=(mode, timebase, times=-1))
-                self.blink_thread.run()
-                return
-            while not self.stop_blinking.is_set():
-                self.blink(mode, timebase, times=1)
-            self.stop_blinking.clear()
-            return
-        light_state = self.lights_are_on
-        if mode == "default":
-            for _ in times:
-                time.sleep(timebase)
-                self.lights_on()
-                time.sleep(timebase)
-                self.lights_off()
-        elif mode == "burst":
-            for _ in times:
-                time.sleep(0.5 * timebase)
-                self.lights_on()
-                time.sleep(timebase)
-                self.lights_off()
-        if light_state:
-            self.lights_on()
-        else:
-            self.lights_off()
+    def test_generate_rng(self):
+        return self.finger.generateRandomNumber()
 
     def read_single(self):
         """ read a single template index and return a (idx, name) pair """
         while True:
-            idx = self.finger.getTemplateIndex()
+            log.debug("Waiting for finger")
+            while self.finger.readImage() == False:
+                time.sleep(0.05)
+
+            ## Converts read image to characteristics and stores it in charbuffer 1
+            try:
+                self.finger.convertImage(0x01)
+            except Exception as e:
+                log.warning("Ignoring expcetion in convertImage: %s", str(e))
+
+            ## Checks if finger is already enrolled
+            result = self.finger.searchTemplate()
+            idx = result[0]
             if idx in self.database:
                 log.debug("Successfully read idx %d which belongs to %s", idx, self.database[idx])
                 return (idx, self.database[idx])
             log.warning("Did not recognize finger")
-            self.blink("burst", times=5)
 
     def run(self):
         """Run continuously. Emit a signal if a finger is read."""
@@ -176,6 +142,7 @@ class SaufFinger:
 
     def enroll(self, name):
         """Enroll a new finger and put the save the (idx, name) pair to the DB"""
+        print("Enroll: Trying to register '{}'".format(name))
         print("Enroll: Waiting for finger...")
 
         ## Wait that finger is read
@@ -190,7 +157,7 @@ class SaufFinger:
         position_number = result[0]
 
         if position_number >= 0:
-            print(f"Enroll: Template already exists at position #{position_number}")
+            print("Enroll: Template already exists at position #{}".format(position_number))
             self.__insert_into_database(position_number, name)
             return
 
@@ -218,14 +185,24 @@ class SaufFinger:
         position_number = self.finger.storeTemplate()
         self.__insert_into_database(position_number, name)
         print("Enroll: Finger enrolled successfully!")
-        print(f"Enroll: New template position #{position_number}")
+        print("Enroll: New template position #{}".format(position_number))
+
+
+def debug(finger):
+    """ misc debug operations for R&D """
+    # trying to understand why the returned value when searching the next free index is
+    # always 0
+    idx = finger.finger.getTemplateIndex(0)
+    print(idx)
 
 
 def main(args):
     """ main function """
     finger = SaufFinger()
     if args.enroll:
-        finger.enroll("")
+        finger.enroll(args.enroll)
+    if args.debug:
+        debug(finger)
 
 
 if __name__ == "__main__":
@@ -235,4 +212,5 @@ if __name__ == "__main__":
     """
     parser = ArgumentParser()
     parser.add_argument("--enroll", help="Enroll a new finger", metavar="name")
+    parser.add_argument("--debug", help="Debug - expert use only", action="store_true")
     main(parser.parse_args())

@@ -29,14 +29,14 @@ class Flowmeter:
         self.ticks = 0
         # counter that can not be resetted and is stored to disk
         # TODO: database for this?
+        self.global_count_fname = "flowmeter_global_count_{}.txt".format(self.name).replace(" ", "_")
         self.global_count = self.__init_global_count()
-        self.global_count_fname = f"flowmeter_global_count_{self.name}.txt".replace(" ", "_")
-        self.conversion_factor = self.load_calib
+        self.conversion_factor = self.load_calib()
         self.register_event_listener()
 
     def __init_global_count(self):
         """ load the global ticks from disk """
-        if os.path.isfile(self.global_ticks_fname):
+        if os.path.isfile(self.global_count_fname):
             with open(self.global_count_fname) as fin:
                 return yaml.load(fin)
         return {"ticks": 0, "ml": 0}
@@ -49,7 +49,7 @@ class Flowmeter:
     def __read_all_calibs(self):
         if os.path.isfile(calib_file):
             with open(calib_file) as calib_in:
-                return yaml.load(calib_file)
+                return yaml.load(calib_in)
         return dict()
 
     def register_event_listener(self):
@@ -107,6 +107,7 @@ class Flowmeter:
         self.write_calib()
         return True
 
+    @property
     def milliliters(self):
         """
         Return the current measured quantity in milliliters.
@@ -114,9 +115,10 @@ class Flowmeter:
         milliliters = self.ticks / self.conversion_factor
         return milliliters
 
+    @property
     def ml(self):
         """ wrapper around milliliters """
-        return self.milliliters()
+        return self.milliliters
 
     def liters(self):
         """
