@@ -7,7 +7,7 @@
     * [zapfhahn](#zapfhahn)
   * [Timezone notes](#timezone-notes)
   * [Install pyfingerprint](#install-pyfingerprint)
-  * [Fingerprint notes](#fingerprint-notes)
+    * [pyfingerprint - required modifications / hacks](#pyfingerprint---required-modifications--hacks)
   * [Valve notes](#valve-notes)
   * [MariaDB notes](#mariadb-notes)
     * [phpMyAdmin](#phpmyadmin)
@@ -111,10 +111,10 @@ minicom -b 57600 -o -D /dev/serial0
 
 If everything is working correctly the terminal will echo every keystroke.
 
-## Fingerprint notes
+### pyfingerprint - required modifications / hacks
 
 We've tried many libraries and the different notes a bit spread over multiple READMEs.
-Now we are using the pyfingerprint library directly in python and the notes about the wiring are in the [FPM-pi README]([src/zapfhahn/hardware/FPM-pi/README.md](https://gitlab.com/saufhaengerle/picode/blob/master/src/zapfhahn/hardware/FPM-pi/README.md))
+Now we are using the pyfingerprint library directly in python and the notes about the wiring are in the [FPM-pi README](https://gitlab.com/saufhaengerle/picode/blob/master/src/zapfhahn/hardware/FPM-pi/README.md)
 
 There is a special feature about the R551 sensor that needs a slight modification in the pyfingerprint library.
 It is discussed in [this thread](https://github.com/brianrho/FPM/issues/8) and the fix for python is inspired by [these lines](if (page == 0 && group_idx == 0 && fid == 0)).
