@@ -30,6 +30,7 @@ config_file = "daemon_config.yaml"
 #       Let them blink while the valves are open
 #       Switch them off when the valves close
 
+
 class StateAttributes:
     """
     helper class that stores all the changing attributes that are required in the
@@ -156,8 +157,9 @@ class SaufDaemon(StateMachine):
                     break
             else:
                 raise RuntimeError(
-                    "Registered valve in slot %d has now corresponding flowmeter",
-                    valve.slot,
+                    "Registered valve in slot {} has now corresponding flowmeter".format(
+                        valve.slot
+                    )
                 )
         for meter in self.flowmeters:
             for valve in self.valves:
@@ -165,8 +167,9 @@ class SaufDaemon(StateMachine):
                     break
             else:
                 raise RuntimeError(
-                    "Registered flowmeter in slot %d has now corresponding valve",
-                    valve.slot,
+                    "Registered flowmeter in slot {} has now corresponding valve".format(
+                        valve.slot
+                    )
                 )
 
     def load_config(self):
@@ -231,7 +234,11 @@ class SaufDaemon(StateMachine):
                 log.debug("Caught KeyboardInterrupt. Exiting gracefully")
                 break
             except Exception as e:
-                log.error("Encountered exception of type '%s' in run loop. Exception message: '%s'. Going to error state.", type(e), str(e))
+                log.error(
+                    "Encountered exception of type '%s' in run loop. Exception message: '%s'. Going to error state.",
+                    type(e),
+                    str(e),
+                )
                 self.current_state = self.error
 
     #
@@ -352,6 +359,8 @@ class SaufDaemon(StateMachine):
 def formatted_time():
     return time.strftime("%Y-%m-%d %H:%M:%S")
 
+
 if __name__ == "__main__":
     daemon = SaufDaemon("saufen")
+    # daemon._dump_config()
     daemon.run()

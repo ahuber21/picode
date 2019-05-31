@@ -11,8 +11,8 @@ from hardware.valve import MagneticValve
 
 
 def main():
-    test_valve()
-    test_flowmeter()
+    # test_valve()
+    # test_flowmeter()
     test_fingerprint()
 
 
@@ -23,7 +23,7 @@ def test_valve():
     pin21 is the bottom right pin
     """
     valve = MagneticValve(
-        name="TestValve", pin=21, slot=10, quantity_ml=100, timeout_seconds=40
+        name="TestValve", pin=19, slot=10, quantity_ml=100, timeout_seconds=40, debug=True
     )
     print("Opening valve")
     valve.open()
@@ -38,7 +38,7 @@ def test_flowmeter():
     """
     Create a flowmeter instance and let it run for a while.
     """
-    fm = Flowmeter(pin=26, name="flowmeter_test", slot=10)
+    fm = Flowmeter(pin=2, name="flowmeter_test", slot=10)
     if fm.conversion_factor != 1:
         print("Current calibration: {}".format(fm.conversion_factor))
     assert fm.calib(), "Calibration failed."

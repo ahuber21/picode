@@ -9,6 +9,10 @@ import os
 import RPi.GPIO as GPIO
 import yaml
 
+from argparse import ArgumentParser
+
+from .valve import MagneticValve
+
 GPIO.setmode(GPIO.BCM)
 
 calib_file = "flowmeter_calib.yml"
@@ -22,17 +26,21 @@ class Flowmeter:
     The default constructor will take the GPIO Pin Number as an argument.
     """
 
-    def __init__(self, name, pin, slot):
+    def __init__(self, name, pin, slot, valve_pin=None, debug=False):
         self.name = name
         self.pin = pin
         self.slot = slot
         self.ticks = 0
         # counter that can not be resetted and is stored to disk
         # TODO: database for this?
-        self.global_count_fname = "flowmeter_global_count_{}.txt".format(self.name).replace(" ", "_")
+        self.global_count_fname = "flowmeter_global_count_{}.txt".format(
+            self.name
+        ).replace(" ", "_")
         self.global_count = self.__init_global_count()
         self.conversion_factor = self.load_calib()
         self.register_event_listener()
+        self.valve_pin = valve_pin
+        self.debug = debug
 
     def __init_global_count(self):
         """ load the global ticks from disk """
@@ -63,10 +71,12 @@ class Flowmeter:
         """
         Callback for the GPIO pin event listener
         """
+        if self.debug:
+            print("flowmeter on pin #{} - TICK".format(self.pin))
         self.ticks += 1
         self.global_count["ticks"] += 1
         if self.conversion_factor != 0:
-            self.global_count["ml"] += 1. / self.conversion_factor
+            self.global_count["ml"] += 1.0 / self.conversion_factor
         if (self.global_count["ticks"] % 300) == 0:
             self.__dump_global_count()
 
@@ -80,6 +90,16 @@ class Flowmeter:
         """
         print("Flowmeter - starting calibration mode")
         ticks_start = self.ticks
+        if self.valve_pin:
+            valve = MagneticValve(
+                name="calib",
+                pin=self.valve_pin,
+                slot=-2,
+                quantity_ml=1e5,
+                timeout_seconds=-2,
+            )
+            print("Opening valve on pin {}".format(self.valve_pin))
+            valve.open()
         print("Current tick counter is {}".format(ticks_start))
         print("Please start tapping beer now and note down the quantity!")
         print("Please enter how much you tapped in MILLILITERS.")
@@ -138,5 +158,27 @@ class Flowmeter:
         all_calibs = self.__read_all_calibs()
         all_calibs[self.name] = self.conversion_factor
         with open(calib_file, "w") as calib_out:
-            yaml.dump(all_calibs, calib_out,  default_flow_style=False)
+            yaml.dump(all_calibs, calib_out, default_flow_style=False)
 
+
+def calib(pin, name, slot):
+    """ calibrate specifed meter """
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--calib", help="Calibrate meter", action="store_true")
+    parser.add_argument("--pin", help="Pin of meter", type=int)
+    parser.add_argument("--name", help="Name of meter")
+    parser.add_argument(
+        "--valve_pin",
+        help="Pin of the valve that goes open for calibration",
+        default=None,
+        type=int,
+    )
+    args = parser.parse_args()
+    if args.calib:
+        meter = Flowmeter(
+            pin=args.pin, name=args.name, slot=99, valve_pin=args.valve_pin, debug=False
+        )
+        meter.calib()

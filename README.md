@@ -2,6 +2,8 @@
 
 
 * [picode - All code that is run on the Saufhaengerle Raspberry Pi](#picode---all-code-that-is-run-on-the-saufhaengerle-raspberry-pi)
+  * [Volumio DHPC / WiFi server](#volumio-dhpc--wifi-server)
+  * [TODO](#todo)
   * [Contents](#contents)
     * [switcher](#switcher)
     * [zapfhahn](#zapfhahn)
@@ -11,6 +13,23 @@
   * [Valve notes](#valve-notes)
   * [MariaDB notes](#mariadb-notes)
     * [phpMyAdmin](#phpmyadmin)
+    * [Grafana](#grafana)
+
+## Volumio DHPC / WiFi server
+
+```
+user: pi
+password: NU-AD-76
+
+alternative user: volumio
+```
+
+## TODO
+
+* Multiple fingers per user
+  * Fingerprint class?
+* Only valves that are registered for user
+* Auto-close when idle, i.e. no quantity for x seconds
 
 
 Code here is set up for python version 3.X and all required packages are defined in `requirements.txt`.
@@ -98,6 +117,7 @@ and remove the following entry
 ```
 console=serial0,115200
 ```
+
 
 It is also necessary to disable the system service that initialises the modem so it doesn't use the UART: `sudo systemctl disable hciuart`.
 
@@ -239,6 +259,11 @@ MariaDB [(none)]> GRANT ALL PRIVILEGES ON *.* TO 'suffi'@'localhost' IDENTIFIED 
 Query OK, 0 rows affected (0.00 sec)
 ```
 
+We also add a read-only user for grafana
+
+```bash
+GRANT SELECT,SHOW VIEW ON *.* TO 'grafana'@'localhost' IDENTIFIED BY 'grafana_view_user';
+```
 
 ### phpMyAdmin
 
@@ -273,3 +298,30 @@ sudo ln -s /usr/share/phpmyadmin /var/www/html
 ```
 
 Now you can connect to it, e.g. on `http://192.168.178.86:81/phpmyadmin`
+
+### Grafana
+
+```bash
+$ wget https://dl.grafana.com/oss/release/grafana-rpi_6.2.1_armhf.deb
+$ sudo dpkg -i grafana-rpi_6.2.1_armhf.deb
+```
+
+Add grafana to autostart
+
+```bash
+$ sudo /bin/systemctl daemon-reload
+$ sudo /bin/systemctl enable grafana-server
+```
+
+The grafana server is listening on port 3000.
+Log in on `http://192.168.178.86:3000` using user admin with password admin.
+Grafana will ask you to change the PW after your first login.
+Of course we change it to NU-AD-76.
+
+There we can add a database
+
+* Type: MySQL
+* Host: localhost:3306
+* Database: SaufDatabase
+* User: grafana
+* Password: grafana_view_user

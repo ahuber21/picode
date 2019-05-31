@@ -1,0 +1,35 @@
+flowmeters:
+- name: flowmeter_slot0
+  pin: 26
+  slot: 0
+- name: flowmeter_slot1
+  pin: 19
+  slot: 1
+- name: flowmeter_slot2
+  pin: 13
+  slot: 2
+- name: flowmeter_augustiner_hell
+  pin: 6
+  slot: 3
+valve_global_timeout_seconds: 80
+valves:
+- name: valve_slot0
+  pin: 21
+  quantity_ml: 500
+  slot: 0
+  timeout_seconds: 20
+- name: valve_slot1
+  pin: 20
+  quantity_ml: 500
+  slot: 1
+  timeout_seconds: 20
+- name: valve_slot2
+  pin: 16
+  quantity_ml: 500
+  slot: 2
+  timeout_seconds: 20
+- name: valve_augustiner_hell
+  pin: 12
+  quantity_ml: 500
+  slot: 3
+  timeout_seconds: 40
