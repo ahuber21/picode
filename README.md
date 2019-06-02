@@ -30,6 +30,13 @@ alternative user: volumio
   * Fingerprint class?
 * Only valves that are registered for user
 * Auto-close when idle, i.e. no quantity for x seconds
+* Logs to website
+* Web terminal
+* Android app with push notifications
+  * some statistics for every tap
+* Web interface for valve/daemon configuration
+* Web interface to start calib?
+* Warning when tapped quantity threshold is reached
 
 
 Code here is set up for python version 3.X and all required packages are defined in `requirements.txt`.

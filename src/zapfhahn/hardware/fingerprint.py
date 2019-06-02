@@ -102,7 +102,7 @@ class SaufFinger:
             try:
                 self.finger.convertImage(0x01)
             except Exception as e:
-                log.warning("Ignoring expcetion in convertImage: %s", str(e))
+                log.warning("Ignoring exception in convertImage: %s", str(e))
 
             ## Checks if finger is already enrolled
             result = self.finger.searchTemplate()

@@ -11,7 +11,10 @@ import yaml
 
 from argparse import ArgumentParser
 
-from .valve import MagneticValve
+if __name__ == "__main__":
+    from valve import MagneticValve
+else:
+    from hardware.valve import MagneticValve
 
 GPIO.setmode(GPIO.BCM)
 
@@ -156,6 +159,17 @@ class Flowmeter:
     def write_calib(self):
         """ write the current conversion factor to disk, overwriting existing values """
         all_calibs = self.__read_all_calibs()
+        if self.name in all_calibs:
+            legacy_nr = 0
+            while True:
+                # find a legacy place for this calib
+                legacy_idx = "{}_legacy_{}".format(self.name, legacy_nr)
+                if legacy_idx in all_calibs:
+                    legacy_nr += 1
+                    continue
+                print("Storing already existing value of {} as new key {}".format(all_calibs[self.name], legacy_idx))
+                all_calibs[legacy_idx] = all_calibs[self.name]
+                break
         all_calibs[self.name] = self.conversion_factor
         with open(calib_file, "w") as calib_out:
             yaml.dump(all_calibs, calib_out, default_flow_style=False)

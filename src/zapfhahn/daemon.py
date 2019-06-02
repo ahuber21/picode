@@ -26,11 +26,6 @@ log = get_logger(os.path.basename(__file__), level=DEBUG)
 config_file = "daemon_config.yaml"
 
 
-# TODO: Switch on Fingerprint LEDs whenever we're waiting for finger input
-#       Let them blink while the valves are open
-#       Switch them off when the valves close
-
-
 class StateAttributes:
     """
     helper class that stores all the changing attributes that are required in the
@@ -284,12 +279,6 @@ class SaufDaemon(StateMachine):
         # reset the flow meters to measure only the delta
         for meter in self.flowmeters:
             meter.reset()
-        # enable blinking to visualize user we're ready
-        # self.finger.run_blinking(timebase=1)
-        # - check all valves for changes
-        # - as soon as one reached a delta of XY (20??) ml close all the others
-        # - when the threshold (self.config.valve_quantity_ml) is reached close the remaining
-        # - done
         start = time.time()
         flowmeter_threshold_ml = 20
         chosen_valve = None
