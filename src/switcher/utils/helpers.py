@@ -39,5 +39,8 @@ def get_states() -> dict:
     Load the switch states from the json file.
     """
     with open(get_states_file()) as fp_states:
-        states = json.load(fp_states)
-    return states
+        try: 
+                states = json.load(fp_states)
+        except json.decoder.JSONDecodeError:
+                return dict()
+        return states

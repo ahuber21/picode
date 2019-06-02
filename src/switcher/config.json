@@ -1,8 +1,13 @@
 {
     "loglevel": "debug",
     "switches": {
-        "Spinners": 1,
-        "Wasserlichter": 2,
-        "LEDs": 3
+        "XXX1": 5,
+        "XXX2": 6,
+        "XXX3": 13,
+	"XXX4": 16,
+	"XXX5": 19,
+	"XXX6": 20,
+	"XXX7": 21,
+	"XXX8": 26
     }
 }
