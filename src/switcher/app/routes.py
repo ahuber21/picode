@@ -8,12 +8,14 @@ import os
 from flask import render_template, request
 
 from app import app
+from app.gpio import Switcher
 from utils.helpers import get_states, get_states_file
 from utils.log import get_logger
 from utils.config import get_config
 
 log = get_logger(os.path.basename(__file__))
 
+switcher = Switcher()
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -32,12 +34,10 @@ def index():
 
 
 @app.route("/toggle", methods=["POST"])
-def toggle():
+def switch():
     port = request.form.get("port")
     state = request.form.get("state")
     log.info("Switching port %s. New state: %s", port, state)
-    states = get_states()
-    states[port] = state
-    with open(get_states_file(), "w") as fp:
-        json.dump(states, fp)
+    switcher.switch(port, state)
     return "Thanks"
+
