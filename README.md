@@ -2,7 +2,7 @@
 
 
 * [picode - All code that is run on the Saufhaengerle Raspberry Pi](#picode---all-code-that-is-run-on-the-saufhaengerle-raspberry-pi)
-  * [Volumio DHPC / WiFi server](#volumio-dhpc--wifi-server)
+  * [Links](#links)
   * [TODO](#todo)
   * [Contents](#contents)
     * [switcher](#switcher)
@@ -16,14 +16,12 @@
     * [phpMyAdmin](#phpmyadmin)
     * [Grafana](#grafana)
 
-## Volumio DHPC / WiFi server
+## Links
 
-```
-user: pi
-password: NU-AD-76
-
-alternative user: volumio
-```
+* saufanlage myPhpAdmin: http://saufanlage.local:81/http://saufanlage.local:81/phpmyadmin/
+  * suffi - NU-AD-76
+* saufanlage grafana: http://saufanlage.local:3000
+  * admin - NU-AD-76
 
 ## TODO
 
@@ -177,8 +175,6 @@ for idx, pageElement in enumerate(pageElements):
         positionIsUsed = (self.__bitAtPosition(pageElement, p) == 1)
         templateIndex.append(positionIsUsed)
 ```
-
-
 
 ### Using fingerprint sensor
 
