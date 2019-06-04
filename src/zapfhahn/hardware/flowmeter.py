@@ -41,9 +41,9 @@ class Flowmeter:
         ).replace(" ", "_")
         self.global_count = self.__init_global_count()
         self.conversion_factor = self.load_calib()
-        self.register_event_listener()
         self.valve_pin = valve_pin
         self.debug = debug
+        self.register_event_listener()
 
     def __init_global_count(self):
         """ load the global ticks from disk """
@@ -67,6 +67,8 @@ class Flowmeter:
         """
         Registers the event listener for the specified pin
         """
+        GPIO.setup(self.pin, GPIO.OUT)
+        GPIO.output(self.pin, GPIO.LOW)
         GPIO.setup(self.pin, GPIO.IN)
         GPIO.add_event_detect(self.pin, GPIO.RISING, callback=self.tick)
 
@@ -74,13 +76,13 @@ class Flowmeter:
         """
         Callback for the GPIO pin event listener
         """
-        if self.debug:
-            print("flowmeter on pin #{} - TICK".format(self.pin))
+        if self.debug and self.ticks % 100 == 0:
+            print("flowmeter on pin #{} - ticks = {}".format(self.pin, self.ticks))
         self.ticks += 1
         self.global_count["ticks"] += 1
         if self.conversion_factor != 0:
             self.global_count["ml"] += 1.0 / self.conversion_factor
-        if (self.global_count["ticks"] % 300) == 0:
+        if (self.global_count["ticks"] % 50) == 0:
             self.__dump_global_count()
 
     def reset(self):
@@ -147,7 +149,7 @@ class Flowmeter:
         """
         Return the current measured quantity in liters.
         """
-        return self.milliliters() / 1000.0
+        return self.milliliters / 1000.0
 
     def load_calib(self):
         """ load the conversion factor from disk, if it exists """
@@ -174,9 +176,6 @@ class Flowmeter:
         with open(calib_file, "w") as calib_out:
             yaml.dump(all_calibs, calib_out, default_flow_style=False)
 
-
-def calib(pin, name, slot):
-    """ calibrate specifed meter """
 
 
 if __name__ == "__main__":
