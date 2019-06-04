@@ -9,7 +9,7 @@ flowmeters:
   pin: 13
   slot: 2
 - name: flowmeter_augustiner_hell
-  pin: 6
+  pin: 5
   slot: 3
 valve_global_timeout_seconds: 80
 valves:

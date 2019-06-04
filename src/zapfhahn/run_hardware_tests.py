@@ -11,9 +11,12 @@ from hardware.valve import MagneticValve
 
 
 def main():
-    # test_valve()
-    # test_flowmeter()
-    test_fingerprint()
+    try:
+        # test_valve()
+        test_flowmeter()
+        # test_fingerprint()
+    except:
+        pass
 
 
 def test_valve():
@@ -22,27 +25,37 @@ def test_valve():
 
     pin21 is the bottom right pin
     """
-    valve = MagneticValve(
-        name="TestValve", pin=19, slot=10, quantity_ml=100, timeout_seconds=40, debug=True
-    )
-    print("Opening valve")
-    valve.open()
-    print("Waiting 5 seconds...")
-    time.sleep(5)
-    print("Closing valve")
-    valve.close()
-    print("Test was successful if it opened and closed")
+    for pin in [12, 16, 20, 21]:
+    # for pin in [21]*5:
+        valve = MagneticValve(
+            name="TestValve", pin=pin, slot=10, quantity_ml=100, timeout_seconds=40, debug=True
+        )
+        print("Opening valve on pin {}".format(pin))
+        valve.open()
+        print("Waiting 2 seconds...")
+        time.sleep(2)
+        print("Closing valve on pin {}".format(pin))
+        valve.close()
+    print("Test was successful if it all valves opened and closed")
 
 
 def test_flowmeter():
     """
     Create a flowmeter instance and let it run for a while.
     """
-    fm = Flowmeter(pin=2, name="flowmeter_test", slot=10)
+    # fm = Flowmeter(pin=26, name="flowmeter_test", slot=10, debug=True)
+    # fm = Flowmeter(pin=19, name="flowmeter_test", slot=10, debug=True)
+    fm = Flowmeter(pin=13, name="flowmeter_test", slot=10, debug=True)
+    # fm = Flowmeter(pin=6, name="flowmeter_test", slot=10, debug=True)
+    for pin in [12, 16, 20, 21]:
+        valve = MagneticValve(
+            name="TestValve", pin=pin, slot=10, quantity_ml=100, timeout_seconds=40, debug=True
+        )
+        valve.open()
     if fm.conversion_factor != 1:
         print("Current calibration: {}".format(fm.conversion_factor))
     assert fm.calib(), "Calibration failed."
-    print("Current milliliters: {}".format(fm.milliliters()))
+    print("Current milliliters: {}".format(fm.milliliters))
     print("Current liters:      {}".format(fm.liters()))
 
 

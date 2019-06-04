@@ -1,5 +1,13 @@
 CALIB_TEST: 7.67
 flowmeter_augustiner_hell: 0.55
 flowmeter_augustiner_hell_legacy_0: 0.402
-flowmeter_test: 0.0
+flowmeter_test: 10.725
+flowmeter_test_legacy_0: 0.0
+flowmeter_test_legacy_1: 688.0
+flowmeter_test_legacy_2: 0.0
+flowmeter_test_legacy_3: 35.44444444444444
+flowmeter_test_legacy_4: 61.8
+flowmeter_test_legacy_5: 63.4
+flowmeter_test_legacy_6: 51.0
+flowmeter_test_legacy_7: 0.0
 valve_wasser: 0.699
