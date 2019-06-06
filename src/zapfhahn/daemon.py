@@ -15,6 +15,7 @@ from statemachine import StateMachine, State
 from utils.log import get_logger
 
 from database.dblog import DbLogger
+from hardware.fourdigitdisplay import display
 from hardware.fingerprint import SaufFinger
 from hardware.flowmeter import Flowmeter
 from hardware.valve import MagneticValve
@@ -273,6 +274,8 @@ class SaufDaemon(StateMachine):
         for valve in self.valves:
             valve.open()
         self.attributes.valve_open_time = formatted_time()
+        display.number = 0
+        display.on = True
 
     def on_enter_waiting_valve(self):
         log.info("Entering waiting for valves")
@@ -317,6 +320,7 @@ class SaufDaemon(StateMachine):
             # chosen_valve and chosen_flowmeter are guaranteed to be set because
             # of __sanity_checks()
             # wait for tapping procedure to complete
+            display.number = chosen_valve.quantity_ml
             if chosen_flowmeter.ml > chosen_valve.quantity_ml:
                 # self.finger.stop_blinking()
                 log.debug("Surpassed desired quantity of %s", chosen_valve.quantity_ml)
@@ -336,6 +340,7 @@ class SaufDaemon(StateMachine):
         for valve in self.valves:
             valve.close()
         self.attributes.valve_close_time = formatted_time()
+        display.on = False
 
     def on_enter_logging(self):
         log.info("Entering logging")
