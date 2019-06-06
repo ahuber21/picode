@@ -16,6 +16,7 @@ from utils.log import get_logger
 
 from database.dblog import DbLogger
 from hardware.fourdigitdisplay import display
+from database.usermanager import FingerprintFinder
 from hardware.fingerprint import SaufFinger
 from hardware.flowmeter import Flowmeter
 from hardware.valve import MagneticValve
@@ -37,6 +38,8 @@ class StateAttributes:
     user_index = None
     # name of the person behind the user_index
     user_name = ""
+    # fingerprint info
+    fingerprint = None
     # valve info
     valve_slot = -1
     valve_pin = -1
@@ -120,6 +123,7 @@ class SaufDaemon(StateMachine):
         self.attributes = StateAttributes()
         # hardware
         self.finger = SaufFinger()
+        self.finder = FingerprintFinder()
         self.valves = self.__init_valves()
         self.flowmeters = self.__init_flowmeters()
         self.__sanity_checks()
@@ -230,6 +234,7 @@ class SaufDaemon(StateMachine):
                 log.debug("Caught KeyboardInterrupt. Exiting gracefully")
                 break
             except Exception as e:
+                raise e
                 log.error(
                     "Encountered exception of type '%s' in run loop. Exception message: '%s'. Going to error state.",
                     type(e),
@@ -263,11 +268,12 @@ class SaufDaemon(StateMachine):
         log.info("Entering waiting for finger")
         # self.finger.lights_on()
         idx, name = self.finger.read_single()
-        self.attributes.user_index = idx
-        self.attributes.user_name = name
+        self.attributes.fingerprint_index = idx
+        self.attributes.fingerprint_name = name
 
     def on_enter_checking(self):
         log.info("Entering checking ID")
+        self.attributes.fingerprint = self.finder.find_idx(self.attributes.fingerprint_index)
 
     def on_enter_opening(self):
         log.info("Entering open valves")
@@ -322,7 +328,6 @@ class SaufDaemon(StateMachine):
             # wait for tapping procedure to complete
             display.number = chosen_valve.quantity_ml
             if chosen_flowmeter.ml > chosen_valve.quantity_ml:
-                # self.finger.stop_blinking()
                 log.debug("Surpassed desired quantity of %s", chosen_valve.quantity_ml)
                 chosen_valve.close()
                 self.attributes.tap_status = "TAP_COMPLETE"

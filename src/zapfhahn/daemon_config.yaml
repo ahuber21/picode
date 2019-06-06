@@ -11,7 +11,7 @@ flowmeters:
 - name: flowmeter_augustiner_hell
   pin: 5
   slot: 3
-valve_global_timeout_seconds: 80
+valve_global_timeout_seconds: 40
 valves:
 - name: valve_slot0
   pin: 21
@@ -30,6 +30,6 @@ valves:
   timeout_seconds: 20
 - name: valve_augustiner_hell
   pin: 12
-  quantity_ml: 500
+  quantity_ml: 700
   slot: 3
-  timeout_seconds: 40
+  timeout_seconds: 90

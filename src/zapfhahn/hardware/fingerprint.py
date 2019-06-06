@@ -22,12 +22,16 @@ import yaml
 
 
 from argparse import ArgumentParser
+from colorama import Fore
 from pyfingerprint.pyfingerprint import PyFingerprint
 
-from utils.log import get_logger
+if __name__ == "__main__":
+    import logging
+    log = logging.getLogger()
+else:
+    from utils.log import get_logger
+    log = get_logger(os.path.basename(__file__), level="DEBUG")
 
-from logging import DEBUG
-log = get_logger(os.path.basename(__file__), level=DEBUG)
 
 finger_port = "/dev/serial0"
 finger_baud = 57600
@@ -80,10 +84,10 @@ class SaufFinger:
         """Add the (idx, name) pair to the dictionary and save the file"""
         if idx in self.database:
             if self.database[idx] != name:
-                log.error("Index %d already exists and names don't match", idx)
-                log.error("database[idx]      = '%s'", self.database[idx])
-                log.error("name to be written = '%s'", name)
-                return
+                log.warning("Index %d already exists and names don't match", idx)
+                log.warning("database[idx]      = '%s'", self.database[idx])
+                log.warning("name to be written = '%s'", name)
+                log.warning("Updating entry to new name '%s'", name)
         self.database[idx] = name
         with open(database_file, "w") as db_file:
             yaml.dump(self.database, db_file, default_flow_style=False)
@@ -92,7 +96,7 @@ class SaufFinger:
         return self.finger.generateRandomNumber()
 
     def read_single(self):
-        """ read a single template index and return a (idx, name) pair """
+        """ read a single template index and return the index """
         while True:
             log.debug("Waiting for finger")
             while self.finger.readImage() == False:
@@ -140,9 +144,15 @@ class SaufFinger:
             self.finger_available.clear()
             log.info("Processing template with index %d", self.template_index)
 
+    def download_image(self, page_index, file_name):
+        """ Download the image at page_index into file_name """
+        self.finger.loadTemplate(page_index)
+        self.finger.loadTemplate(page_index, 0x02)
+        self.finger.downloadImage(file_name)
+
     def enroll(self, name):
         """Enroll a new finger and put the save the (idx, name) pair to the DB"""
-        print("Enroll: Trying to register '{}'".format(name))
+        print("Enroll: Trying to register {} '{}' {}".format(Fore.BLUE, name, Fore.RESET))
         print("Enroll: Waiting for finger...")
 
         ## Wait that finger is read
@@ -159,7 +169,7 @@ class SaufFinger:
         if position_number >= 0:
             print("Enroll: Template already exists at position #{}".format(position_number))
             self.__insert_into_database(position_number, name)
-            return
+            return position_number
 
         print("Enroll: Remove finger...")
         time.sleep(2)
@@ -176,7 +186,7 @@ class SaufFinger:
         ## Compares the charbuffers
         if self.finger.compareCharacteristics() == 0:
             print("Error in enroll: Fingers do not match")
-            return
+            raise ValueError("Fingers do not match")
 
         ## Creates a template
         self.finger.createTemplate()
@@ -186,14 +196,15 @@ class SaufFinger:
         self.__insert_into_database(position_number, name)
         print("Enroll: Finger enrolled successfully!")
         print("Enroll: New template position #{}".format(position_number))
+        return position_number
 
 
 def debug(finger):
     """ misc debug operations for R&D """
     # trying to understand why the returned value when searching the next free index is
     # always 0
-    idx = finger.finger.getTemplateIndex(0)
-    print(idx)
+    finger.download_image(3, "./bla.bmp")
+
 
 
 def main(args):
@@ -213,4 +224,5 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--enroll", help="Enroll a new finger", metavar="name")
     parser.add_argument("--debug", help="Debug - expert use only", action="store_true")
+    # parser.add_argument("--reset", help="Clear the databases")
     main(parser.parse_args())

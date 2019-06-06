@@ -2,7 +2,7 @@
 
 
 * [picode - All code that is run on the Saufhaengerle Raspberry Pi](#picode---all-code-that-is-run-on-the-saufhaengerle-raspberry-pi)
-  * [Volumio DHPC / WiFi server](#volumio-dhpc--wifi-server)
+  * [Links](#links)
   * [TODO](#todo)
   * [Contents](#contents)
     * [switcher](#switcher)
@@ -10,20 +10,19 @@
   * [Timezone notes](#timezone-notes)
   * [Install pyfingerprint](#install-pyfingerprint)
     * [pyfingerprint - required modifications / hacks](#pyfingerprint---required-modifications--hacks)
+  * [Fixing the image download from charBuffer](#fixing-the-image-download-from-charbuffer)
     * [Using fingerprint sensor](#using-fingerprint-sensor)
   * [Valve notes](#valve-notes)
   * [MariaDB notes](#mariadb-notes)
     * [phpMyAdmin](#phpmyadmin)
     * [Grafana](#grafana)
 
-## Volumio DHPC / WiFi server
+## Links
 
-```
-user: pi
-password: NU-AD-76
-
-alternative user: volumio
-```
+* saufanlage myPhpAdmin: http://saufanlage.local:81/http://saufanlage.local:81/phpmyadmin/
+  * suffi - NU-AD-76
+* saufanlage grafana: http://saufanlage.local:3000
+  * admin - NU-AD-76
 
 ## TODO
 
@@ -178,7 +177,32 @@ for idx, pageElement in enumerate(pageElements):
         templateIndex.append(positionIsUsed)
 ```
 
+## Fixing the image download from charBuffer
 
+In the `loadTemplate` method something goes wrong.
+We have to replace
+
+```python
+        packetPayload = (
+            FINGERPRINT_LOADTEMPLATE,
+            charBufferNumber,
+            self.__rightShift(positionNumber, 8),
+            self.__rightShift(positionNumber, 0),
+        )
+```
+
+with
+
+```python
+        packetPayload = (
+            FINGERPRINT_LOADTEMPLATE,
+            charBufferNumber,
+            self.__rightShift(positionNumber, 8),
+            self.__rightShift(positionNumber, 0) & 0xFF,
+        )
+```
+
+i.e., we have to add the `& 0xFF` part.
 
 ### Using fingerprint sensor
 

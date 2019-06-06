@@ -3,6 +3,8 @@
 """
 
 import logging
+import time
+# import os
 
 from copy import copy
 
@@ -41,4 +43,15 @@ def get_logger(name, level=logging.INFO):
     ch.setFormatter(formatter)
     ch.setLevel(level)
     log.addHandler(ch)
+
+    logging_file = "/home/pi/logs/zapfhahn.log"
+    # if os.path.isfile(logging_file):
+    #     backup_file = logging_file.replace(".log", "-bak-{}.log".format(time.strftime("%Y-%M-%d-%H%M%S")))
+    #     os.rename(logging_file, backup_file)
+
+    fh = logging.FileHandler(logging_file, mode="w+")
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.DEBUG)
+    log.addHandler(fh)
+
     return log
