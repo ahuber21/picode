@@ -30,7 +30,8 @@ class DbLogger:
         """ create a log entry in the database """
         # prepare request
         query = """INSERT INTO `taps`
-                    (`user_index`, `user_name`, `datetime`,
+                    (`user_index`, `user_name`, `finger_name`, `finger_index`, `finger_sensor_index`,
+                      `datetime`,
                       `valve_slot`, `valve_name`, `valve_pin`, `valve_quantity_ml`,
                       `valve_timeout_seconds`, `valve_open_time`, `valve_close_time`,
                       `counter_name`, `counter_pin`, `counter_slot`, `counter_global_ticks`,
@@ -39,10 +40,13 @@ class DbLogger:
                       `screenshot1`, `screenshot2`,
                       `misc`)
                     VALUES
-                      (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
+                      (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
         values = (
-            attributes.user_index,
-            attributes.user_name,
+            attributes.fingerprint.owner.idx,
+            attributes.fingerprint.owner.name,
+            attributes.fingerprint.name,
+            attributes.fingerprint.idx,
+            attributes.fingerprint.sensor_idx,
             time.strftime("%Y-%m-%d %H:%M:%S"),
             attributes.valve_slot,
             attributes.valve_name,

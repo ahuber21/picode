@@ -22,12 +22,16 @@ import yaml
 
 
 from argparse import ArgumentParser
+from colorama import Fore
 from pyfingerprint.pyfingerprint import PyFingerprint
 
-from utils.log import get_logger
+if __name__ == "__main__":
+    import logging
+    log = logging.getLogger()
+else:
+    from utils.log import get_logger
+    log = get_logger(os.path.basename(__file__), level="DEBUG")
 
-from logging import DEBUG
-log = get_logger(os.path.basename(__file__), level=DEBUG)
 
 finger_port = "/dev/serial0"
 finger_baud = 57600
@@ -92,7 +96,7 @@ class SaufFinger:
         return self.finger.generateRandomNumber()
 
     def read_single(self):
-        """ read a single template index and return a (idx, name) pair """
+        """ read a single template index and return the index """
         while True:
             log.debug("Waiting for finger")
             while self.finger.readImage() == False:
@@ -143,11 +147,12 @@ class SaufFinger:
     def download_image(self, page_index, file_name):
         """ Download the image at page_index into file_name """
         self.finger.loadTemplate(page_index)
+        self.finger.loadTemplate(page_index, 0x02)
         self.finger.downloadImage(file_name)
 
     def enroll(self, name):
         """Enroll a new finger and put the save the (idx, name) pair to the DB"""
-        print("Enroll: Trying to register '{}'".format(name))
+        print("Enroll: Trying to register {} '{}' {}".format(Fore.BLUE, name, Fore.RESET))
         print("Enroll: Waiting for finger...")
 
         ## Wait that finger is read
@@ -198,8 +203,8 @@ def debug(finger):
     """ misc debug operations for R&D """
     # trying to understand why the returned value when searching the next free index is
     # always 0
-    idx = finger.finger.getTemplateIndex(0)
-    print(idx)
+    finger.download_image(3, "./bla.bmp")
+
 
 
 def main(args):

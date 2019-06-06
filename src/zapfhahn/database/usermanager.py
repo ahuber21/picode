@@ -16,6 +16,27 @@ from utils.log import get_logger
 log = get_logger(os.path.basename(__file__), level="DEBUG")
 
 
+class FingerprintFinder:
+    connection = mariadb.connect(
+        user="suffi", password="NU-AD-76", database="SaufDatabase"
+    )
+    cursor = connection.cursor()
+
+    def find_idx(self, index):
+        self.cursor.execute(
+            "SELECT id, name, owner_name, owner_idx FROM fingerprints WHERE sensor_idx=%s;", (index,)
+        )
+        results = self.cursor.fetchall()
+        if len(results) == 0:
+            raise ValueError("Fingerprint with sensor_idx = {} does not exist".format(index))
+        idx, name, owner_name, owner_idx = results[0]
+        owner = User(owner_name)
+        assert owner.exists, "I found a fingerprint with an owner that does not exist"
+        finger = Fingerprint(name, owner)
+        assert finger.exists, "I fetched a fingerprint but it does not exist? pls debug"
+        return finger
+
+
 class Fingerprint:
     connection = mariadb.connect(
         user="suffi", password="NU-AD-76", database="SaufDatabase"
@@ -55,7 +76,7 @@ class Fingerprint:
         # update the database
         if self.exists:
             self.cursor.execute(
-                "UPDATE fingerprints SET imgdata=%s WHERE fingerprints.id=%s", (value, self.idx)
+                "UPDATE fingerprints SET imgdata=%s, imgtype='bmp' WHERE fingerprints.id=%s", (value, self.idx)
             )
             self.connection.commit()
 
@@ -97,8 +118,7 @@ class Fingerprint:
                 self.__exists = True
                 self.__idx = idx
                 self.__sensor_idx = sensor_idx
-                self.pic = imgdata
-                log.debug("Read imgdata from database: %s", str(imgdata))
+                self.__pic = imgdata
         return self.__exists
 
 
@@ -203,22 +223,28 @@ class UserManager:
                     continue
             return value
 
-    def add_single_finger(self, finger):
+    def add_single_finger(self, fingerprint):
         """ add the single finger to the database for this user """
         while True:
             try:
-                finger.sensor_idx = self.finger.enroll("{}_{}".format(finger.owner.name, finger.name))
+                fingerprint.sensor_idx = self.finger.enroll("{}_{}".format(fingerprint.owner.name, fingerprint.name))
                 break
             except Exception as e:
-                log.warning("Ingoring error: '%s'", str(e))
+                log.warning("Ignoring error: '%s'", str(e))
                 log.warning("Please try again")
-        finger.create()
-        log.info(
-            "Added {} for user {} with finger_index {}".format(
-                finger.name, finger.owner.name, finger.idx
-            )
-        )
-        finger.sensor_idx
+        # download the image
+        fingerprint.create()
+        # finger_file_name = "./fingerprint_{}_{}.bmp".format(fingerprint.owner.name, fingerprint.name)
+        # log.info("Now downloading the image")
+        # self.finger.download_image(fingerprint.sensor_idx, finger_file_name)
+        # with open(finger_file_name, "rb") as fin:
+        #     fingerprint.pic = fin.read()
+        # log.info(
+        #     "Added {} for user {} with finger_index {}".format(
+        #         fingerprint.name, fingerprint.owner.name, fingerprint.idx
+        #     )
+        # )
+        fingerprint.sensor_idx
 
     def add_fingers_interactively(self, user, update_existing=False):
         """ add all fingers for this user interactively """
@@ -239,22 +265,22 @@ class UserManager:
                 "Caught KeyboradInterrupt - returning without setting remaining fingers"
             )
             return
-        log.info("Now trying to read image data back from sensor")
-        for fingerprint in user.fingerprints.values():
-            if not fingerprint.exists:
-                continue
-            if len(fingerprint.pic) == 0:
-                log.debug("%s appears to have no pic in the DB - trying to download from sensor", fingerprint.name)
-                while True:
-                    try:
-                        self.finger.download_image(fingerprint.sensor_idx, "./fingerprint.bmp")
-                        break
-                    except TypeError as e:
-                        raise e
-                    except Exception as e:
-                        log.warning("Ignoring expcetion of type %s while reading image data: '%s'", type(e), str(e))
-                with open("fingerprint.bmp") as fp_file:
-                    fingerprint.pic = fp_file.read()
+        # log.info("Now trying to read image data back from sensor")
+        # for fingerprint in user.fingerprints.values():
+        #     if not fingerprint.exists:
+        #         continue
+        #     if (not fingerprint.pic) or (len(fingerprint.pic) == 0) or update_existing:
+        #         log.debug("%s creating/updating DB pic with latest version from sensor", fingerprint.name)
+        #         while True:
+        #             try:
+        #                 self.finger.download_image(fingerprint.sensor_idx, "./fingerprint_{}_{}.bmp".format(fingerprint.owner.name, fingerprint.name))
+        #                 break
+        #             except TypeError as e:
+        #                 raise e
+        #             except Exception as e:
+        #                 log.warning("Ignoring expcetion of type %s while reading image data: '%s'", type(e), str(e))
+        #         with open("fingerprint.bmp", "rb") as fp_file:
+        #             fingerprint.pic = fp_file.read()
         return True
 
     def add_user_interactive(self):
