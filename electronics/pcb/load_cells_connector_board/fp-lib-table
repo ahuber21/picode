@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name saufanlage)(type KiCad)(uri /Users/andi/cernbox/basteln/saufhaengerle/picode/electronics/pcb/Libraries/saufanlage.pretty)(options "")(descr ""))
+)

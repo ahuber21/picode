@@ -37,6 +37,7 @@
 * Web interface for valve/daemon configuration
 * Web interface to start calib?
 * Warning when tapped quantity threshold is reached
+* 4 digit display
 
 
 Code here is set up for python version 3.X and all required packages are defined in `requirements.txt`.
