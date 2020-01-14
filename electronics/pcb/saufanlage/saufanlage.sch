@@ -2228,8 +2228,6 @@ F 3 "" H 12550 5200 50  0001 C CNN
 	1    12550 5200
 	0    -1   -1   0   
 $EndComp
-Text GLabel 12150 5300 2    50   Input ~ 0
-N1_RST1
 Text GLabel 12150 6200 2    50   Input ~ 0
 N1_A0
 Text GLabel 12150 6100 2    50   Input ~ 0
@@ -2248,8 +2246,6 @@ Text GLabel 12150 5500 2    50   Input ~ 0
 N1_A7
 Text GLabel 12150 6300 2    50   Input ~ 0
 N1_AREF
-Text GLabel 11400 5300 0    50   Input ~ 0
-N1_RST2
 Wire Wire Line
 	11400 5200 11500 5200
 Wire Wire Line
@@ -2399,8 +2395,6 @@ F 3 "" H 17000 5200 50  0001 C CNN
 	1    17000 5200
 	0    -1   -1   0   
 $EndComp
-Text GLabel 16600 5300 2    50   Input ~ 0
-N2_RST1
 Text GLabel 16600 5700 2    50   Input ~ 0
 SCL
 Text GLabel 16600 5600 2    50   Input ~ 0
@@ -2409,8 +2403,6 @@ Text GLabel 16600 5500 2    50   Input ~ 0
 N2_A7
 Text GLabel 16600 6300 2    50   Input ~ 0
 N2_AREF
-Text GLabel 15850 5300 0    50   Input ~ 0
-N2_RST2
 Wire Wire Line
 	15850 5200 15950 5200
 Wire Wire Line
@@ -2826,8 +2818,6 @@ F 3 "" H 21400 5200 50  0001 C CNN
 	1    21400 5200
 	0    -1   -1   0   
 $EndComp
-Text GLabel 21000 5300 2    50   Input ~ 0
-N3_RST1
 Text GLabel 21000 5500 2    50   Input ~ 0
 N3_A7
 Text GLabel 21000 5600 2    50   Input ~ 0
@@ -2842,8 +2832,6 @@ Text GLabel 21000 6200 2    50   Input ~ 0
 N3_A0
 Text GLabel 21000 6300 2    50   Input ~ 0
 N3_AREF
-Text GLabel 20250 5300 0    50   Input ~ 0
-N3_RST2
 Wire Wire Line
 	20250 5200 20350 5200
 Wire Wire Line
@@ -3546,4 +3534,16 @@ Wire Wire Line
 Connection ~ 8150 8050
 Wire Wire Line
 	8150 8050 8200 8050
+Text GLabel 21000 5300 2    50   Input ~ 0
+N3_RST2
+Text GLabel 20250 5300 0    50   Input ~ 0
+N3_RST1
+Text GLabel 16600 5300 2    50   Input ~ 0
+N2_RST2
+Text GLabel 15850 5300 0    50   Input ~ 0
+N2_RST1
+Text GLabel 12150 5300 2    50   Input ~ 0
+N1_RST2
+Text GLabel 11400 5300 0    50   Input ~ 0
+N1_RST1
 $EndSCHEMATC

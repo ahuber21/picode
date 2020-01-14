@@ -1,5 +1,4 @@
 (sym_lib_table
   (lib (name arduino)(type Legacy)(uri ${KIPRJMOD}/../Libraries/arduino.lib)(options "")(descr ""))
-  (lib (name saufanlage-rescue)(type Legacy)(uri ${KIPRJMOD}/saufanlage-rescue.lib)(options "")(descr ""))
   (lib (name saufanlage)(type Legacy)(uri ${KIPRJMOD}/../Libraries/saufanlage.lib)(options "")(descr ""))
 )
