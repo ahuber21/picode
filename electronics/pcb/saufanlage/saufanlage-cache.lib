@@ -24,6 +24,32 @@ X Pin_3 3 200 -100 150 L 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
+# Connector_Conn_01x04_Male
+#
+DEF Connector_Conn_01x04_Male J 0 40 Y N 1 F N
+F0 "J" 0 200 50 H V C CNN
+F1 "Connector_Conn_01x04_Male" 0 -300 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Connector*:*_1x??_*
+$ENDFPLIST
+DRAW
+S 34 -195 0 -205 1 1 6 F
+S 34 -95 0 -105 1 1 6 F
+S 34 5 0 -5 1 1 6 F
+S 34 105 0 95 1 1 6 F
+P 2 1 1 6 50 -200 34 -200 N
+P 2 1 1 6 50 -100 34 -100 N
+P 2 1 1 6 50 0 34 0 N
+P 2 1 1 6 50 100 34 100 N
+X Pin_1 1 200 100 150 L 50 50 1 1 P
+X Pin_2 2 200 0 150 L 50 50 1 1 P
+X Pin_3 3 200 -100 150 L 50 50 1 1 P
+X Pin_4 4 200 -200 150 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
 # Connector_Conn_01x06_Female
 #
 DEF Connector_Conn_01x06_Female J 0 40 Y N 1 F N
@@ -586,29 +612,6 @@ X GND 9 -300 -1300 100 U 50 50 1 1 W
 ENDDRAW
 ENDDEF
 #
-# Connector_Screw_Terminal_01x02
-#
-DEF Connector_Screw_Terminal_01x02 J 0 40 Y N 1 F N
-F0 "J" 0 100 50 H V C CNN
-F1 "Connector_Screw_Terminal_01x02" 0 -200 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-$FPLIST
- TerminalBlock*:*
-$ENDFPLIST
-DRAW
-C 0 -100 25 1 1 6 N
-C 0 0 25 1 1 6 N
-S -50 50 50 -150 1 1 10 f
-P 2 1 1 6 -21 -87 13 -120 N
-P 2 1 1 6 -21 13 13 -20 N
-P 2 1 1 6 -14 -80 20 -113 N
-P 2 1 1 6 -14 20 20 -13 N
-X Pin_1 1 -200 0 150 R 50 50 1 1 P
-X Pin_2 2 -200 -100 150 R 50 50 1 1 P
-ENDDRAW
-ENDDEF
-#
 # arduino_Arduino_Mega2560_Shield
 #
 DEF arduino_Arduino_Mega2560_Shield XA 0 40 Y Y 1 F N
@@ -934,6 +937,25 @@ X IN- 1 -400 100 100 R 50 50 1 1 W
 X IN+ 2 -400 -100 100 R 50 50 1 1 W
 X OUT+ 3 400 -100 100 L 50 50 1 1 w
 X OUT- 4 400 100 100 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# saufanlage_PJ-031D
+#
+DEF saufanlage_PJ-031D J 0 40 Y Y 1 F N
+F0 "J" 0 200 50 H V C CNN
+F1 "saufanlage_PJ-031D" 0 -200 50 H V C CNN
+F2 "" -250 50 50 H I C CNN
+F3 "" -250 50 50 H I C CNN
+F4 "J" 0 200 50 H V C CNN "Spice_Primitive"
+F5 "PJ-031D" 0 200 50 H V C CNN "Spice_Model"
+F6 "Y" 0 200 50 H V C CNN "Spice_Netlist_Enabled"
+F7 "/Users/andi/cernbox/basteln/saufhaengerle/picode/electronics/pcb/Libraries/PJ-031D/PJ-031D.mod" 0 200 50 H V C CNN "Spice_Lib_File"
+DRAW
+S -150 150 150 -150 0 1 0 N
+X PWR 1 -250 100 100 R 50 50 1 1 w
+X SENSE 2 -250 0 100 R 50 50 1 1 P
+X GND 3 -250 -100 100 R 50 50 1 1 w
 ENDDRAW
 ENDDEF
 #
