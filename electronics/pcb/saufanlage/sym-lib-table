@@ -1,4 +1,5 @@
 (sym_lib_table
   (lib (name arduino)(type Legacy)(uri ${KIPRJMOD}/../Libraries/arduino.lib)(options "")(descr ""))
   (lib (name saufanlage)(type Legacy)(uri ${KIPRJMOD}/../Libraries/saufanlage.lib)(options "")(descr ""))
+  (lib (name 2020-02-06_21-37-09)(type Legacy)(uri ${KIPRJMOD}/../Libraries/2020-02-06_21-37-09.lib)(options "")(descr ""))
 )
