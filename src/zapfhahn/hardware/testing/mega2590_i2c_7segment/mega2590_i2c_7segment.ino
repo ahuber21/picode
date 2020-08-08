@@ -87,7 +87,14 @@ void idle() {
   idle_counter %= 11;
 }
 
+void test() {
+  display.clear();
+  display.writeDigitRaw(0, 0x1);
+  display.writeDisplay();
+}
+
 void loop() {
-  idle();
+  // idle();
+  test();
   delay(100);
 }

@@ -266,4 +266,12 @@ Wire Wire Line
 Connection ~ 3050 3050
 Wire Wire Line
 	3050 3050 2700 3050
+NoConn ~ 4900 1650
+NoConn ~ 4900 1750
+NoConn ~ 4900 2600
+NoConn ~ 4900 2700
+NoConn ~ 4900 3700
+NoConn ~ 4900 3800
+NoConn ~ 4900 4800
+NoConn ~ 4900 4900
 $EndSCHEMATC
